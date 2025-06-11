@@ -1,0 +1,114 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from dotenv import load_dotenv
+from .services.user_services import *
+from .utils.db_logging import log_in_db, delete_old_logs
+
+load_dotenv()
+
+class RegisterAPIView(APIView):
+    
+    def post(self,request):
+        try:
+           response, statuscode = register_user(request.data)
+           return Response({**response}, status=statuscode)
+        except Exception as e:
+            log_in_db("Error", "CREATE", "User", {"message": "Something went wrong.", "Error": str(e)})
+            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LoginAPIView(APIView):
+    def post(self, request):
+        try:
+            response, statuscode = login_user(request.data)
+            return Response({**response}, status=statuscode)
+
+        except Exception as e:
+            log_in_db("Error", "LOGIN", "User", {"message": "Something went wrong.", "Error": str(e)})
+            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# This view is to get the data of Particular user using {id}.
+class UserDetailedAPIView(APIView):
+    def get(self,reqeust, id):
+        try:
+            response, statuscode = get_user_by_id(id)
+            return Response({**response}, status=statuscode)
+        
+        except Exception as e:
+            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# This view is to get all user, delete a particular user, and update a particular user.
+
+class UserDetailsAPIView(APIView):
+    def get(self, request):
+        try:
+            response, statuscode = get_all_users()
+            return Response({**response}, status=statuscode)
+        
+        except Exception as e:
+            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+    def delete(self, request, id):
+        try:
+            # Retrive user from the Id using helper function.
+            response, statuscode = delete_user_by_id(id)
+            return Response({**response}, status=statuscode)
+        
+        except Exception as e:
+            log_in_db("Error", "DELETE", "User", {"message": "Something went wrong.", "Error": str(e)})
+            return Response(
+                {"success": False, "message": "Something went Wrong.","Error":str(e)},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        
+    def put(self,request,id):
+        try:
+            print(id)
+            response, statuscode = update_user_and_contact(id, request.data)
+            return Response({**response}, status=statuscode)
+            
+        except Exception as e:
+            log_in_db("Error", "UPDATE", "User", {"message": "Something went wrong.", "Error": str(e)})
+            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class LogDeletionView(APIView):
+    def post(self, request,id):
+        try:
+            filename, deleted_count = delete_old_logs(id)
+
+            if deleted_count == 0:
+                return Response({"message": "No logs older than this found."}, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({
+                "message": f"{deleted_count} logs older than {id} hours backed up and deleted.",
+                "backup_file": filename
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class SearchUserAPIView(APIView):
+    def get(self, request):
+        try:
+            filters = request.query_params
+            response = search_users(filters)
+            return Response(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "success": False,
+                "message": "Something went wrong.",
+                "error": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
