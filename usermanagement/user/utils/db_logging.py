@@ -7,13 +7,15 @@ import os
 
 load_dotenv()
 
+# returning the collection in that mongodb database.
 def getMongoConnection():
-    print("Printing mongoURL :",settings.MONGO_URL)
+    # print("Printing mongoURL :",settings.MONGO_URL)
     client = MongoClient(settings.MONGO_URL)
     db = client[settings.MONGO_DB_NAME]
     return db['logs']
 
 
+# function which is storing log into mongodb.
 def log_in_db(level, action, resource, details=None):
     logs_collection = getMongoConnection()
     log_entry = {
@@ -28,6 +30,8 @@ def log_in_db(level, action, resource, details=None):
 
 
 
+
+# function to delete logs in the database.
 def delete_old_logs(hours):
     collection = getMongoConnection()
     deletion_time = datetime.now() - timedelta(hours=int(hours))
@@ -53,3 +57,4 @@ def delete_old_logs(hours):
 
     result = collection.delete_many({"timestamp": {"$lt": deletion_time}})
     return filename, result.deleted_count
+

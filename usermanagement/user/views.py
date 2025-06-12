@@ -32,53 +32,39 @@ class LoginAPIView(APIView):
 
 # This view is to get the data of Particular user using {id}.
 class UserDetailedAPIView(APIView):
-    def get(self,reqeust, id):
+    def get(self, request, id):
         try:
             response, statuscode = get_user_by_id(id)
             return Response({**response}, status=statuscode)
-        
         except Exception as e:
-            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False, "message": "Something went wrong.", "Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# This view is to get all user, delete a particular user, and update a particular user.
 
-class UserDetailsAPIView(APIView):
+class UserListAPIView(APIView):
     def get(self, request):
         try:
             response, statuscode = get_all_users()
             return Response({**response}, status=statuscode)
-        
         except Exception as e:
-            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return Response({"success": False, "message": "Something went wrong.", "Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class UserUpdateDeleteAPIView(APIView):
     def delete(self, request, id):
         try:
-            # Retrive user from the Id using helper function.
             response, statuscode = delete_user_by_id(id)
             return Response({**response}, status=statuscode)
-        
         except Exception as e:
             log_in_db("Error", "DELETE", "User", {"message": "Something went wrong.", "Error": str(e)})
-            return Response(
-                {"success": False, "message": "Something went Wrong.","Error":str(e)},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        
-    def put(self,request,id):
+            return Response({"success": False, "message": "Something went Wrong.", "Error": str(e)}, status=status.HTTP_204_NO_CONTENT)
+
+    def put(self, request, id):
         try:
-            print(id)
             response, statuscode = update_user_and_contact(id, request.data)
             return Response({**response}, status=statuscode)
-            
         except Exception as e:
             log_in_db("Error", "UPDATE", "User", {"message": "Something went wrong.", "Error": str(e)})
-            return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+            return Response({"success": False, "message": "Something went wrong.", "Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LogDeletionView(APIView):
@@ -107,8 +93,4 @@ class SearchUserAPIView(APIView):
             response = search_users(filters)
             return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({
-                "success": False,
-                "message": "Something went wrong.",
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False,"message": "Something went wrong.","error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -17,7 +17,7 @@ class User(AbstractUser):
         return f"{self.first_name} {self.last_name}"
 
 
-# Contact model should NOT inherit from AbstractUser
+# Contact model
 class Contact(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contacts")
     id = models.AutoField(primary_key=True)

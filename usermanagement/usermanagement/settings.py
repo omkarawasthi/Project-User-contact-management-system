@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-from datetime import timedelta
 
 load_dotenv()
 
@@ -83,13 +82,12 @@ WSGI_APPLICATION = 'usermanagement.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'user_management',
-        'USER': 'omkar',
-        'PASSWORD': 'omkar2002',
+        'NAME': os.environ.get('POSTGRES_DATABASE_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -97,12 +95,6 @@ DATABASES = {
 
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 
 # Password validation
@@ -148,6 +140,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = 'user.User'
+
+
 MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME')
 MONGO_URL = os.environ.get('MONGO_URL')
 
@@ -158,13 +152,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Simple JWT Configuration
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-}
 
 # Caching (Redis)
 CACHES = {
@@ -181,56 +168,37 @@ CACHES = {
 
 # Celery Configuration
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 
 # Email Configuration
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_HOST = os.environ.get('EMAIL_HOST') 
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
+EMAIL_FROM = os.environ.get('EMAIL_FROM')
 
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
 
-#     # Define where logs will go
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'filename': os.path.join(BASE_DIR, 'logs/ debug.log'),
-#         },
-#     },
+from celery.schedules import crontab
 
-#     # Define the format of the logs
-#     'formatters': {
-#         'verbose': {
-#             'format': '[{asctime}] {levelname} {name} {message}',
-#             'style': '{',
-#         },
-#         'simple': {
-#             'format': '{levelname}: {message}',
-#             'style': '{',
-#         },
-#     },
-
-#     # Assign handlers to different parts of Django
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console', 'file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#         'job': {  # your app name
-#             'handlers': ['console', 'file'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
-#     }
-# }
+CELERY_BEAT_SCHEDULE = {
+    # Every day at 08:00, enqueue the reminder email
+    'daily-upcoming-birthday-reminder': {
+        'task': 'user.celery_task.send_upcoming_birthday_reminder',
+        'schedule': crontab(minute='*/1'),
+        'args': (),  # no arguments
+    },
+    # Every day at 09:00, enqueue the birthday greeting emails
+    'daily-birthday-greetings': {
+        'task': 'user.celery_task.send_birthday_greetings',
+        'schedule': crontab(minute='*/1'),
+        'args': (),
+    },
+}

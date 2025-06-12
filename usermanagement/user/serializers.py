@@ -19,11 +19,11 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        user = User.objects.create_user( # Use create_user for proper password hashing
+        user = User.objects.create_user( 
             username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''), # Use .get() for optional fields
+            first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '')
         )
         return user
@@ -35,7 +35,6 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_phone_no(self, value):
-        # E.164 format: +countrycode subscriber number
         pattern = r'^\+[1-9]\d{1,14}$'
         if not re.match(pattern, value):
             raise serializers.ValidationError(
