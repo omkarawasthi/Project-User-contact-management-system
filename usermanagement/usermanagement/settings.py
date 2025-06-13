@@ -201,4 +201,11 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*/1'),
         'args': (),
     },
+
+    'daily-log-cleanup': {
+        'task': 'user.celery_task.scheduled_log_deletion',
+        # 'schedule': crontab(minute=0, hour=3),  # every day at 3 AM
+        'schedule': crontab(minute='*/1'),
+        'args': [24],  # delete logs older than 24 hours
+    },
 }

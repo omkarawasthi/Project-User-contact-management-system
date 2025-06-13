@@ -3,6 +3,8 @@ from django.conf import settings
 from datetime import date,timedelta
 from .models import Contact, User
 from django.core.mail import send_mail
+from .utils.db_logging import delete_old_logs
+from datetime import timedelta
 
 @shared_task
 def send_upcoming_birthday_reminder():
@@ -78,3 +80,23 @@ def send_birthday_greetings():
         except Exception as e:
             print(str(e))
     return "Birthday greetings sent."
+
+
+
+
+@shared_task
+def scheduled_log_deletion(hours: int = 24):
+    try:
+        filename, deleted_count = delete_old_logs(hours)
+
+        if deleted_count == 0:
+            return {"status":False,"message": f"No logs older than {hours} hours found."}
+
+        return {
+            "status":True,
+            "message": f"{deleted_count} logs older than {hours} hours backed up and deleted.",
+            "backup_file": filename
+        }
+
+    except Exception as e:
+        return {"status":False,"error": str(e)}

@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from dotenv import load_dotenv
 from .services.user_services import *
-from .utils.db_logging import log_in_db, delete_old_logs
+from .utils.db_logging import log_in_db
+from .celery_task import scheduled_log_deletion
 
 load_dotenv()
 
@@ -70,14 +71,11 @@ class UserUpdateDeleteAPIView(APIView):
 class LogDeletionView(APIView):
     def post(self, request,id):
         try:
-            filename, deleted_count = delete_old_logs(id)
-
-            if deleted_count == 0:
-                return Response({"message": "No logs older than this found."}, status=status.HTTP_404_NOT_FOUND)
+            scheduled_log_deletion.delay(int(id))
 
             return Response({
-                "message": f"{deleted_count} logs older than {id} hours backed up and deleted.",
-                "backup_file": filename
+                "status":True,
+                "message": f"Log deletion task for logs older than {id} hours scheduled.",
             }, status=status.HTTP_200_OK)
 
         except Exception as e:

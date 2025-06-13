@@ -17,7 +17,6 @@ This is Django project that provides an API for managing contacts and users. It 
     -   **Birthday Reminders**: Celery task runs daily to check for upcoming birthdays and sends reminder emails to users via SMTP.
 -   **Logging**:
     -   **MongoDB**: All actions (user registration, profile updates, contact CRUD) are logged to a MongoDB database.
-    -   **Django Logging Framework**: Uses a custom handler to route logs seamlessly to MongoDB.
     -   **Log Deletion**: An admin-only API endpoint to archive old logs to a file and delete them from the database.
 -   **Performance**:
     -   **Redis**: Caches user and contact lists to retrive details fast.
