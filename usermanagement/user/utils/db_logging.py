@@ -34,12 +34,13 @@ def log_in_db(level, action, resource, details=None):
 # function to delete logs in the database.
 def delete_old_logs(hours):
     collection = getMongoConnection()
+     # deletion_time = datetime.now() - relativedelta(months=int(months))
     deletion_time = datetime.now() - timedelta(hours=int(hours))
 
     logsCollection = list(collection.find({"timestamp": {"$lt": deletion_time}}))
-
+    
     if not logsCollection:
-        return None, 0
+        return "",0
 
     # converting it to json object correctly.
     for log in logsCollection:
@@ -56,5 +57,5 @@ def delete_old_logs(hours):
         json.dump(logsCollection, f, indent=4)
 
     result = collection.delete_many({"timestamp": {"$lt": deletion_time}})
+    
     return filename, result.deleted_count
-

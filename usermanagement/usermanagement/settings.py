@@ -192,20 +192,20 @@ CELERY_BEAT_SCHEDULE = {
     # Every day at 08:00, enqueue the reminder email
     'daily-upcoming-birthday-reminder': {
         'task': 'user.celery_task.send_upcoming_birthday_reminder',
+        # 'schedule': crontab(hour=7, minute=30),
         'schedule': crontab(minute='*/1'),
-        'args': (),  # no arguments
     },
     # Every day at 09:00, enqueue the birthday greeting emails
     'daily-birthday-greetings': {
         'task': 'user.celery_task.send_birthday_greetings',
+        # 'schedule': crontab(hour=7, minute=30),
         'schedule': crontab(minute='*/1'),
-        'args': (),
     },
 
     'daily-log-cleanup': {
         'task': 'user.celery_task.scheduled_log_deletion',
-        # 'schedule': crontab(minute=0, hour=3),  # every day at 3 AM
+        # 'schedule': crontab(minute=0, hour=3),
         'schedule': crontab(minute='*/1'),
-        'args': [24],  # delete logs older than 24 hours
+        'args': [24],
     },
 }

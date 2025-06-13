@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from ..serializers import UserSerializer, ContactSerializer
 from ..models import User, Contact
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from rest_framework import status
 from rest_framework import serializers
@@ -211,24 +211,20 @@ def update_user_and_contact(id, data):
     # Find user with contact model.
     # user = contact.user
 
+    user_fields = ['first_name', 'last_name', 'email', 'password']
+    contact_fields = ['first_name', 'last_name', 'phone_no', 'aadhar_no', 'date_of_birth']
+
     # because user and contact both are different field so make different dict for both to update 
     # differently
-    user_data = {
-        'first_name':data['first_name'],
-        'last_name':data['last_name'],
-        'email':data['email'],
-        'password':data['password']
-    }
+    user_data = {}
+    for field in user_fields:
+        if field in data:
+            user_data[field] = data[field]
 
-
-    contact_data = {
-        'first_name':data['first_name'],
-        'last_name':data['last_name'],
-        'phone_no':data['phone_no'],
-        'aadhar_no':data['aadhar_no'],
-        'date_of_birth':data['date_of_birth']
-    }
-
+    contact_data = {}
+    for field in contact_fields:
+        if field in data:
+            contact_data[field] = data[field]
     # Update User fields via serializer
     user_serializer = UserSerializer(instance=user, data=user_data,partial=True)
     if user_serializer.is_valid():
@@ -285,3 +281,4 @@ def search_users(filters):
     serializer = ContactSerializer(contact, many=True)
 
     return {"success": True, "message": "Filtered users retrieved.", "users": serializer.data}
+

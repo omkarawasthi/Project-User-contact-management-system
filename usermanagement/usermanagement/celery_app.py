@@ -14,7 +14,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 import user.celery_task
 
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+# app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
 @app.task(bind=True)
