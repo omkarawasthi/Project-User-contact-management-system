@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from ..serializers import UserSerializer, ContactSerializer
 from ..models import User, Contact
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from rest_framework_simplejwt.tokens import RefreshToken
 from dotenv import load_dotenv
 from rest_framework import status
 from rest_framework import serializers
@@ -77,14 +78,14 @@ def register_user(data):
     contact_serializer = ContactSerializer(data=contact_data)
     
     # now we send user data to frontend so remove password field from it for security.
-    del user_data["password"]
+    # del user_data["password"]
 
     if contact_serializer.is_valid():
         contact_serializer.save(user=user)
         
         log_in_db("INFO", "CREATE", "User", {"message": "User created successfully.","User":user_data})
 
-        return {"success":True,"message": "User created successfully.","User":user_data},status.HTTP_201_CREATED
+        return {"success":True,"message": "User created successfully.","User":user_serializer.data},status.HTTP_201_CREATED
     
     else:
         log_in_db("Validation Error", "CREATE", "User", {"Error": contact_serializer.errors})
@@ -124,20 +125,24 @@ def login_user(data):
 
     # if everthing goes write convert the object and set to payload to find jwt token
     serializer = UserSerializer(user)
-    payload = serializer.data.copy()
-    payload['exp'] = (datetime.now() + timedelta(minutes=15)).isoformat()
+    # payload = serializer.data.copy()
+    # payload['exp'] = (datetime.now() + timedelta(minutes=15)).isoformat()
     
-    # function to get jwt token.
-    token = jwt.encode(payload, os.getenv('JWT_SECRET_KEY'), algorithm=os.getenv('JWT_ALGORITHM'))
+    # # function to get jwt token.
+    # token = jwt.encode(payload, os.getenv('JWT_SECRET_KEY'), algorithm=os.getenv('JWT_ALGORITHM'))
+
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
     log_in_db("INFO", "LOGIN", "User", {"message": "User Login Successfully"})
     
-    return {"success":True,"accessToken": token, "user": payload}, status.HTTP_200_OK
+    return {"success":True,"accessToken": access_token, "user": serializer.data}, status.HTTP_200_OK
 
 
 
 def get_all_users():
     # finding users from redis database cache memory
     cached_users = cache.get("all_users")
+
 
     # if found return response of user found from cache, if you want to tell otherwise no need. 
     if cached_users:
@@ -221,20 +226,23 @@ def update_user_and_contact(id, data):
         if field in data:
             user_data[field] = data[field]
 
+    # print("user is :", user_data)
+
     contact_data = {}
     for field in contact_fields:
         if field in data:
             contact_data[field] = data[field]
+
     # Update User fields via serializer
     user_serializer = UserSerializer(instance=user, data=user_data,partial=True)
     if user_serializer.is_valid():
-        user.save()
+        user_serializer.save()
 
     # Update Contact fields via serializer
-    serializer = ContactSerializer(instance=contact, data=contact_data, partial=True)
+    contact_serializer = ContactSerializer(instance=contact, data=contact_data, partial=True)
 
-    if serializer.is_valid():
-        serializer.save()
+    if contact_serializer.is_valid():
+        contact_serializer.save()
         log_in_db("INFO", "UPDATE", "User AND Contact", {"message": "User and Contact updated successfully."})
         return {
                     "success":True,
@@ -242,8 +250,8 @@ def update_user_and_contact(id, data):
                     "user_email": user.email,
                 }, status.HTTP_200_OK
     else:
-        log_in_db("ERROR", "UPDATE", "User AND Contact", {"message": serializer.errors})
-        return {"success": False, "message": serializer.errors},status.HTTP_204_NO_CONTENT
+        log_in_db("ERROR", "UPDATE", "User AND Contact", {"message": contact_serializer.errors})
+        return {"success": False, "message": contact_serializer.errors},status.HTTP_204_NO_CONTENT
     
 
 
@@ -281,4 +289,3 @@ def search_users(filters):
     serializer = ContactSerializer(contact, many=True)
 
     return {"success": True, "message": "Filtered users retrieved.", "users": serializer.data}
-

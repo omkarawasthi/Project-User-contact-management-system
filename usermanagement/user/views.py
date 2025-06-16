@@ -2,9 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from dotenv import load_dotenv
+from rest_framework.permissions import IsAuthenticated
 from .services.user_services import *
 from .utils.db_logging import log_in_db
-from .celery_task import scheduled_log_deletion
+from user.celery_task import scheduled_log_deletion
 
 load_dotenv()
 
@@ -42,6 +43,8 @@ class UserDetailedAPIView(APIView):
 
 
 class UserListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request):
         try:
             response, statuscode = get_all_users()
@@ -51,6 +54,8 @@ class UserListAPIView(APIView):
 
 
 class UserUpdateDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def delete(self, request, id):
         try:
             response, statuscode = delete_user_by_id(id)
@@ -69,6 +74,8 @@ class UserUpdateDeleteAPIView(APIView):
 
 
 class LogDeletionView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request,id):
         try:
             scheduled_log_deletion.delay(int(id))
@@ -85,6 +92,8 @@ class LogDeletionView(APIView):
 
 
 class SearchUserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         try:
             filters = request.query_params

@@ -1,6 +1,7 @@
 venv
 .env
 usermanagement/backup/
+usermanagement/backup_contacts
 usermanagement/user/__pycache__
 usermanagement/user/services/__pycache__
 usermanagement/user/migrations/__pycache__

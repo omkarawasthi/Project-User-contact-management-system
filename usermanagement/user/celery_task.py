@@ -27,7 +27,8 @@ def send_upcoming_birthday_reminder():
         full_names.append(name)
 
     names = ", ".join(full_names)
-
+    print("Name :", names)
+    
     birthday_user_ids = birthday_contacts.values_list('user_id', flat=True)
     emails_to_notify = list(
         User.objects
