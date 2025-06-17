@@ -25,8 +25,6 @@ def register_user(data):
     date_of_birth = data["date_of_birth"]
     username = data["username"]
 
-
-
     # If any field is missing then return all field requireds.
     if not all([first_name, last_name, email, password, phone_no,date_of_birth,aadhar_no,username]):
         log_in_db("User Form Error", "CREATE", "User", {"message": "All fields including role are required."})
@@ -46,6 +44,7 @@ def register_user(data):
     # Find user using email.
     user = User.objects.filter(email=email)
     
+    
     # make user data to send to Contact model.
     user_data = {
         "first_name": first_name,
@@ -54,6 +53,7 @@ def register_user(data):
         "username":data["username"],
         "password": password
     }
+
 
     # make contact data to send to Contact model.
     contact_data = {
@@ -112,6 +112,7 @@ def login_user(data):
     # find User using email 
     user = User.objects.get(email=email)
     # print(user.email)
+
     
     # If user not exits then return user not exists or invalid credential
     if not User.DoesNotExist:
@@ -210,7 +211,7 @@ def update_user_and_contact(id, data):
     user = get_object_or_404(User, id=id)
     #if contact not exits with this id, the you are updating wrong User which not exits.
     if not contact.DoesNotExist:
-        log_in_db("ERROR", "UPDATE", "User AND Contact", {"messsage":"User does not Exists."})
+        log_in_db("ERROR", "UPDATE","User AND Contact",{"messsage":"User does not Exists."})
         return {"Success":False, "messsage":"User does not Exists."},status.HTTP_400_BAD_REQUEST
 
     # Find user with contact model.
@@ -219,8 +220,10 @@ def update_user_and_contact(id, data):
     user_fields = ['first_name', 'last_name', 'email', 'password']
     contact_fields = ['first_name', 'last_name', 'phone_no', 'aadhar_no', 'date_of_birth']
 
+    # changed or not.
     # because user and contact both are different field so make different dict for both to update 
     # differently
+
     user_data = {}
     for field in user_fields:
         if field in data:

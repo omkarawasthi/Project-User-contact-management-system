@@ -46,13 +46,13 @@ def send_upcoming_birthday_reminder():
         "Best,\nYour Friendly Bot"
     )
 
-    from_email = settings.EMAIL_FROM
+    # from_email = settings.EMAIL_FROM
+
     send_mail(
-        subject,
-        message,
-        from_email,
-        emails_to_notify,
-        fail_silently=False,
+        subject=subject,
+        message=message,
+        from_email='omkar.awasthi@adcuratio.com',
+        recipient_list=emails_to_notify,
     )
 
     return f"Reminder sent to {len(emails_to_notify)} users."
@@ -73,10 +73,10 @@ def send_birthday_greetings():
         print("User email", user.email)
         try:
             send_mail(
-                "Happy Birthday 🎂",
-                f"Dear {user.first_name},\n\nWishing you a fantastic birthday filled with joy and love!",
-                "omkar.awasthi@adcuratio.com",
-                [user.email],
+                subject="Happy Birthday 🎂",
+                message=f"Dear {user.first_name},\n\nWishing you a fantastic birthday filled with joy and love!",
+                from_email="omkar.awasthi@adcuratio.com",
+                recipient_list=[user.email],
             )
         except Exception as e:
             print(str(e))

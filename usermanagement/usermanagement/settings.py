@@ -186,6 +186,21 @@ EMAIL_FROM = os.environ.get('EMAIL_FROM')
 
 
 
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'          # or your provider’s SMTP host
+EMAIL_PORT = 587                       # TLS port
+EMAIL_HOST_USER = 'omkarawasthi67@gmail.com'
+EMAIL_HOST_PASSWORD = 'wkve laub djtp ndpj'
+EMAIL_USE_TLS = True
+
+
+
+
+
+
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
