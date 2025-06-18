@@ -6,6 +6,7 @@ from .utils.helper_functions import calculate_age
 # Custom user model
 class User(AbstractUser):
     email = models.EmailField(unique=True)
+    id = models.AutoField(primary_key=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

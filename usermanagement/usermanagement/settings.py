@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'user',
@@ -52,11 +53,21 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+
+
 
 ROOT_URLCONF = 'usermanagement.urls'
 
@@ -176,26 +187,27 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 # Email Configuration
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+# SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+# EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
+# EMAIL_HOST = os.environ.get('EMAIL_HOST') 
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
+# EMAIL_FROM = os.environ.get('EMAIL_FROM')
+
+
+
+
+
+
+
+
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-EMAIL_HOST = os.environ.get('EMAIL_HOST') 
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.environ.get('EMAIL_HOST')        # or your provider’s SMTP host
+EMAIL_PORT = os.environ.get('EMAIL_PORT')                      # TLS port
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
-EMAIL_FROM = os.environ.get('EMAIL_FROM')
-
-
-
-
-
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'          # or your provider’s SMTP host
-EMAIL_PORT = 587                       # TLS port
-EMAIL_HOST_USER = 'omkarawasthi67@gmail.com'
-EMAIL_HOST_PASSWORD = 'wkve laub djtp ndpj'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
-
 
 
 

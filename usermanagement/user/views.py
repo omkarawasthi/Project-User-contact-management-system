@@ -97,6 +97,7 @@ class SearchUserAPIView(APIView):
     def get(self, request):
         try:
             filters = request.query_params
+            # print("filters are :", filters)
             response = search_users(filters)
             return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
