@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from rest_framework.permissions import IsAuthenticated
 from .services.user_services import *
 from .utils.db_logging import log_in_db
-from user.celery_task import scheduled_log_deletion
+from user.celery_task import scheduled_log_deletion, send_upcoming_birthday_reminder
+from .utils.helper_functions import find_birthday_next_week
 
 load_dotenv()
 
@@ -78,7 +79,7 @@ class LogDeletionView(APIView):
 
     def post(self, request,id):
         try:
-            scheduled_log_deletion.delay(int(id))
+            scheduled_log_deletion.delay(int(id))  # type: ignore
 
             return Response({
                 "status":True,
@@ -100,5 +101,31 @@ class SearchUserAPIView(APIView):
             # print("filters are :", filters)
             response = search_users(filters)
             return Response(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"success": False,"message": "Something went wrong.","error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class BirthdayAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request,id):
+        try:
+            print("id is :",id)
+            response = find_birthday_next_week(id)
+            print(response)
+            return Response(response,status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"success": False,"message": "Something went wrong.","error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class SendingEmailToAllView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request):
+        try:
+            send_upcoming_birthday_reminder()
+            return Response({"status":True,"message":"send reminders successfully"},status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"success": False,"message": "Something went wrong.","error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

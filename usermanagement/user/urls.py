@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterAPIView, LoginAPIView, UserListAPIView, UserDetailedAPIView, UserUpdateDeleteAPIView, LogDeletionView, SearchUserAPIView
+from .views import RegisterAPIView, LoginAPIView, UserListAPIView, UserDetailedAPIView, UserUpdateDeleteAPIView, LogDeletionView, SearchUserAPIView, BirthdayAPIView, SendingEmailToAllView
 
 urlpatterns = [
     path('login',LoginAPIView.as_view()),
@@ -10,4 +10,6 @@ urlpatterns = [
     path('getuser/<int:id>',UserDetailedAPIView.as_view()),
     path('deletelogs/<int:id>',LogDeletionView.as_view()),
     path('users/search/', SearchUserAPIView.as_view()),
+    path('birthday-users/<int:id>',BirthdayAPIView.as_view()),
+    path('send-birthday-emails',SendingEmailToAllView.as_view()),
 ]

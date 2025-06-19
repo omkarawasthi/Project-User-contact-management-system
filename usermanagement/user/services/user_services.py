@@ -26,9 +26,9 @@ def register_user(data):
     username = data["username"]
 
     # If any field is missing then return all field requireds.
-    if not all([first_name, last_name, email, password, phone_no,date_of_birth,aadhar_no,username]):
-        log_in_db("User Form Error", "CREATE", "User", {"message": "All fields including role are required."})
-        return {"success":False,"message": "All fields including role are required."},status.HTTP_400_BAD_REQUEST
+    if not all([first_name, last_name, email, password, phone_no, date_of_birth, aadhar_no, username]):
+        log_in_db("User Form Error", "CREATE", "User", {"message": "All fields are required."})
+        return {"success":False,"message": "All fields are required."},status.HTTP_400_BAD_REQUEST
 
     validate_email = UserSerializer().validate_email(email)
 
