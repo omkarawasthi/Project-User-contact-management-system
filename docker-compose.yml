@@ -8,19 +8,19 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-omkar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   redis:
     image: redis:6-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
   mongo:
     image: mongo:4.4
     volumes:
       - mongo_data:/data/db
     ports:
-      - "27017:27017"
+      - "27018:27017"
 
   web:
     build: .
@@ -52,7 +52,7 @@ services:
 
   celery-beat:
     build: .
-    command: celery -A usermanagement beat --loglevel=info
+    command: celery -A usermanagement.celery_app beat --loglevel=info
     volumes:
       - .:/app
     env_file:
