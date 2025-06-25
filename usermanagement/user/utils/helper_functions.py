@@ -16,7 +16,7 @@ def calculate_age(born):
 def find_birthday_next_week(days):
     from user.models import Contact
 
-    upcoming = []
+    upcoming_birthdays = []
     today = date.today()
 
     # Use select_related to fetch User alongside Contact for efficiency
@@ -31,7 +31,7 @@ def find_birthday_next_week(days):
         for contact in contacts:
             # Safely retrieve email from related User
             email = getattr(contact, 'user', None) and contact.user.email
-            upcoming.append({
+            upcoming_birthdays.append({
                 "id": contact.id,
                 "first_name": f"{contact.first_name}",
                 "last_name": f"{contact.last_name}",
@@ -40,4 +40,4 @@ def find_birthday_next_week(days):
                 "dob": contact.date_of_birth,
             })
 
-    return upcoming
+    return upcoming_birthdays
