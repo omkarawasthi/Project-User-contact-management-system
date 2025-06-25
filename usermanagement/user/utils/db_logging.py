@@ -7,6 +7,7 @@ import os
 
 load_dotenv()
 
+
 # returning the collection in that mongodb database.
 def getMongoConnection():
     # print("Printing mongoURL :",settings.MONGO_URL)
@@ -27,8 +28,6 @@ def log_in_db(level, action, resource, details=None):
         }
 
     logs_collection.insert_one(log_entry)
-
-
 
 
 # function to delete logs in the database.
