@@ -10,10 +10,10 @@ load_dotenv()
 
 # returning the collection in that mongodb database.
 def getMongoConnection():
-    # print("Printing mongoURL :",settings.MONGO_URL)
     client = MongoClient(settings.MONGO_URL)
     db = client[settings.MONGO_DB_NAME]
     return db['logs']
+
 
 
 # function which is storing log into mongodb.
