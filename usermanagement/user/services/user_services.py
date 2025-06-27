@@ -131,11 +131,13 @@ def login_user(data):
         log_in_db("ERROR", "LOGIN", "User",{"message":"User with this email does not exist."})
         return {"success": False, "message": "Invalid credentials or User doesn't exist."}, status.HTTP_400_BAD_REQUEST
     
+
     # now match the password given by user with the stored userd password.
     if not user.check_password(password):
         log_in_db("ERROR", "LOGIN", "User", {"message": "Invalid credentials(password)."})
         return {"success":False,"message": "Invalid credentials (email/password)."}, status.HTTP_400_BAD_REQUEST
 
+    
     # if everthing goes write convert the object and set to payload to find jwt token
     user_serializer = UserSerializer(user)
     contact_serializer = ContactSerializer(contact)
@@ -160,7 +162,6 @@ def login_user(data):
     log_in_db("INFO", "LOGIN", "User", {"message": "User Login Successfully"})
     
     return {"success":True,"accessToken": access_token, "user": data_send}, status.HTTP_200_OK
-
 
 
 def get_all_users():
@@ -261,7 +262,6 @@ def update_user_and_contact(id, data):
     # changed or not.
     # because user and contact both are different field so make different dict for both to update 
     # differently
-
     user_data = {}
     for field in user_fields:
         if field in data:
