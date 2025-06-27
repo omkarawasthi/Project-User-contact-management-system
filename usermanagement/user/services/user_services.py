@@ -40,6 +40,7 @@ def register_user(data):
         log_in_db("ERROR", "CREATE", "User", {"message": "Email already registered."})
         return {"success":False,"message": "Email already registered."}, status.HTTP_400_BAD_REQUEST
     
+    
     # Find user using email.
     user = User.objects.filter(email=email)
     
@@ -94,7 +95,7 @@ def register_user(data):
             "date_of_birth": date_of_birth
         }
         
-        
+
         log_in_db("INFO", "CREATE", "User", {"message": "User created successfully.","User":user_data})
         return {"success":True,"message": "User created successfully.","User":data_send},status.HTTP_201_CREATED
     
