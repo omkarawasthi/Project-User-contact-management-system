@@ -26,18 +26,18 @@ def register_user(data):
 
     # If any field is missing then return all field requireds.
     if not all([first_name, last_name, email, password, phone_no, date_of_birth, aadhar_no, username]):
-        # log_in_db("User Form Error", "CREATE", "User", {"message": "All fields are required."})
+        log_in_db("User Form Error", "CREATE", "User", {"message": "All fields are required."})
         return {"success":False,"message": "All fields are required."},status.HTTP_400_BAD_REQUEST
 
     validate_email = UserSerializer().validate_email(email) # type: ignore
 
     if not validate_email:
-        # log_in_db("ERROR", "CREATE", "User", {"message": "Please write correct format of Email."})
+        log_in_db("ERROR", "CREATE", "User", {"message": "Please write correct format of Email."})
         return {"success":False,"message": "Please write correct format of Email."}, status.HTTP_400_BAD_REQUEST
     
     #if email already exits then send that email already exits.
     if User.objects.filter(email=email).exists():
-        # log_in_db("ERROR", "CREATE", "User", {"message": "Email already registered."})
+        log_in_db("ERROR", "CREATE", "User", {"message": "Email already registered."})
         return {"success":False,"message": "Email already registered."}, status.HTTP_400_BAD_REQUEST
     
     # Find user using email.
@@ -70,7 +70,7 @@ def register_user(data):
     if user_serializer.is_valid():
         user = user_serializer.save()
     else:
-        # log_in_db("Validation Error", "CREATE", "User", {"Error": user_serializer.errors})
+        log_in_db("Validation Error", "CREATE", "User", {"Error": user_serializer.errors})
         return {"success": False, "errors": user_serializer.errors}, status.HTTP_400_BAD_REQUEST
     
     contact_data['user'] = user.id # type: ignore
@@ -93,12 +93,11 @@ def register_user(data):
         }
         
         
-        # log_in_db("INFO", "CREATE", "User", {"message": "User created successfully.","User":user_data})
-
+        log_in_db("INFO", "CREATE", "User", {"message": "User created successfully.","User":user_data})
         return {"success":True,"message": "User created successfully.","User":data_send},status.HTTP_201_CREATED
     
     else:
-        # log_in_db("Validation Error", "CREATE", "User", {"Error": contact_serializer.errors})
+        log_in_db("Validation Error", "CREATE", "User", {"Error": contact_serializer.errors})
         return {"success": False, "errors": contact_serializer.errors},status.HTTP_400_BAD_REQUEST
 
 
@@ -108,14 +107,14 @@ def login_user(data):
 
     # if any field is missing give error
     if not all([email, password]):
-        # log_in_db("ERROR", "LOGIN", "User", {"message": "Email and password are required."})
+        log_in_db("ERROR", "LOGIN", "User", {"message": "Email and password are required."})
         return {"success":False,"message": "Email and password are required."}, status.HTTP_400_BAD_REQUEST
 
     try:
         # if email field is not valid then we return from here. 
         email = UserSerializer().validate_email(email) # type: ignore
     except serializers.ValidationError as e:
-        # log_in_db("ERROR", "LOGIN", "User", {"message": "Invalid email format."})
+        log_in_db("ERROR", "LOGIN", "User", {"message": "Invalid email format."})
         return {"success": False, "message": "Invalid email format."}, status.HTTP_400_BAD_REQUEST
     
 
@@ -128,12 +127,12 @@ def login_user(data):
     
     # If user not exits then return user not exists or invalid credential
     if not User.DoesNotExist:
-        # log_in_db("ERROR", "LOGIN", "User",{"message":"User with this email does not exist."})
+        log_in_db("ERROR", "LOGIN", "User",{"message":"User with this email does not exist."})
         return {"success": False, "message": "Invalid credentials or User doesn't exist."}, status.HTTP_400_BAD_REQUEST
     
     # now match the password given by user with the stored userd password.
     if not user.check_password(password):
-        # log_in_db("ERROR", "LOGIN", "User", {"message": "Invalid credentials(password)."})
+        log_in_db("ERROR", "LOGIN", "User", {"message": "Invalid credentials(password)."})
         return {"success":False,"message": "Invalid credentials (email/password)."}, status.HTTP_400_BAD_REQUEST
 
     # if everthing goes write convert the object and set to payload to find jwt token
@@ -166,7 +165,7 @@ def login_user(data):
 
     refresh = RefreshToken.for_user(user)
     access_token = str(refresh.access_token)
-    # log_in_db("INFO", "LOGIN", "User", {"message": "User Login Successfully"})
+    log_in_db("INFO", "LOGIN", "User", {"message": "User Login Successfully"})
     
     return {"success":True,"accessToken": access_token, "user": data_send}, status.HTTP_200_OK
 
