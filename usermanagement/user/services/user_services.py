@@ -73,15 +73,17 @@ def register_user(data):
         log_in_db("Validation Error", "CREATE", "User", {"Error": user_serializer.errors})
         return {"success": False, "errors": user_serializer.errors}, status.HTTP_400_BAD_REQUEST
     
+
     contact_data['user'] = user.id # type: ignore
     contact_serializer = ContactSerializer(data=contact_data)
     
+
     # now we send user data to frontend so remove password field from it for security.
-    # del user_data["password"]
 
     if contact_serializer.is_valid():
         contact_serializer.save(user=user)
-        
+
+
         data_send = {
             "first_name": first_name,
             "last_name": last_name,
@@ -118,12 +120,11 @@ def login_user(data):
         return {"success": False, "message": "Invalid email format."}, status.HTTP_400_BAD_REQUEST
     
 
+
     # find User using email 
     user = User.objects.get(email=email)
     contact = Contact.objects.get(user_id = user.id)
     
-    # print(user.email)
-
     
     # If user not exits then return user not exists or invalid credential
     if not User.DoesNotExist:
@@ -140,11 +141,8 @@ def login_user(data):
     contact_serializer = ContactSerializer(contact)
 
 
-    # print(type(user_serializer.data))
     user_data = user_serializer.data
-    # print(data.get('first_name'))
     contact_data = contact_serializer.data
-    # print(contact_data)
 
     data_send = {}
     data_send['first_name'] = user_data.get('first_name') # type: ignore
@@ -156,12 +154,6 @@ def login_user(data):
     data_send['date_of_birth'] = contact_data.get('date_of_birth') # type: ignore
 
 
-
-    # payload = serializer.data.copy()
-    # payload['exp'] = (datetime.now() + timedelta(minutes=15)).isoformat()
-    
-    # # function to get jwt token.
-    # token = jwt.encode(payload, os.getenv('JWT_SECRET_KEY'), algorithm=os.getenv('JWT_ALGORITHM'))
 
     refresh = RefreshToken.for_user(user)
     access_token = str(refresh.access_token)
@@ -186,7 +178,6 @@ def get_all_users():
 
     # if not in cache then fetch from the database.
     users = User.objects.all()
-    contacts = Contact.objects.all()
 
 
     user_serializer = UserSerializer(users, many=True)
@@ -204,8 +195,6 @@ def get_user_by_id(user_id):
     # finding user from redis database cache memory
     cache_key = f"user_{user_id}"
     cached_user = cache.get(cache_key)
-    # cache.delete(f"user_{user_id}")
-    # r.delete('your_cache_key')
 
     # if found return response of user found from cache, if you want to tell otherwise no need. 
     if cached_user:
@@ -259,10 +248,6 @@ def update_user_and_contact(id, data):
     contact = get_object_or_404(Contact, id = id)
     user = get_object_or_404(User, id=id)
 
-
-
-
-    # print("data is :", data)
     
     #if contact not exits with this id, the you are updating wrong User which not exits.
     if not contact.DoesNotExist:
@@ -270,8 +255,6 @@ def update_user_and_contact(id, data):
         return {"Success":False, "messsage":"User does not Exists."},status.HTTP_400_BAD_REQUEST
 
     # Find user with contact model.
-    # user = contact.user
-
     user_fields = ['first_name', 'last_name', 'email', 'password']
     contact_fields = ['first_name', 'last_name', 'phone_no', 'aadhar_no', 'date_of_birth']
 
@@ -284,7 +267,6 @@ def update_user_and_contact(id, data):
         if field in data:
             user_data[field] = data[field]
 
-    # print("user is :", user_data)
 
     contact_data = {}
     for field in contact_fields:    
@@ -329,18 +311,15 @@ def update_user_and_contact(id, data):
     
 
 def search_users(filters):
+    
     # filter details from query params
     name = filters.get('name').strip()
     
-    # names = name.split(' ')
-
     qs = Contact.objects.all()
 
-    # print("name :", name)
     
     #find all contacts in queryset.
     parts = name.split()
-    # print("parts is :", parts)
 
     name_q = Q()
     for part in parts:
@@ -348,7 +327,7 @@ def search_users(filters):
         qs = qs.filter(name_q)
 
     
-    serializer = ContactSerializer(qs, many=True)
+    # serializer = ContactSerializer(qs, many=True)
     
     # user = contact.user
     results = []
@@ -357,7 +336,6 @@ def search_users(filters):
         contact_data['email'] = contact.user.email
         results.append(contact_data)
 
-    # print("searched data :", serializer.data)
+    
 
     return {"success": True, "message": "Filtered users retrieved.", "users": results}
-

@@ -45,7 +45,6 @@ class UserDetailedAPIView(APIView):
 
 class UserListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
 
     def get(self, request):
         try:
@@ -119,7 +118,7 @@ class BirthdayAPIView(APIView):
         
         except Exception as e:
             return Response({"success": False,"message": "Something went wrong.","error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
 
 class SendingEmailToAllView(APIView):
     permission_classes = [IsAuthenticated]
