@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-    def validate_email(self, value):
+    def validate_email(self, value:str):
         # Email format validation
         pattern = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
         if not re.match(pattern, value):

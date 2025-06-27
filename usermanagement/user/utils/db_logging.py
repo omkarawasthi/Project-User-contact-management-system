@@ -1,7 +1,7 @@
-from pymongo import MongoClient
-from django.conf import settings
-from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from django.conf import settings
+from pymongo import MongoClient
+from dotenv import load_dotenv
 import json
 import os
 
@@ -13,7 +13,6 @@ def getMongoConnection():
     client = MongoClient(settings.MONGO_URL)
     db = client[settings.MONGO_DB_NAME]
     return db['logs']
-
 
 
 # function which is storing log into mongodb.

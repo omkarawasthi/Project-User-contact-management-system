@@ -4,9 +4,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-contact_db}
-      - POSTGRES_USER=${POSTGRES_USER:-omkar}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=user_management
+      - POSTGRES_USER=omkar
+      - POSTGRES_PASSWORD=omkar2002
     ports:
       - "5433:5432"
 
@@ -27,9 +27,10 @@ services:
 
   web:
     build: .
-    command: bash -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver"
+    command: >
+      bash -c "python usermanagement/manage.py makemigrations &&
+               python usermanagement/manage.py migrate &&
+               python usermanagement/manage.py runserver 0.0.0.0:8000"
     container_name: usermanagementapp
     volumes:
       - .:/app
@@ -45,7 +46,8 @@ services:
 
   celery:
     build: .
-    command: celery -A usermanagement worker --loglevel=info
+    command: celery -A usermanagement.celery_app worker --loglevel=info
+    working_dir: /app/usermanagement
     volumes:
       - .:/app
     env_file:
@@ -55,10 +57,10 @@ services:
       - db
 
 
-
   celery-beat:
     build: .
     command: celery -A usermanagement.celery_app beat --loglevel=info
+    working_dir: /app/usermanagement
     volumes:
       - .:/app
     env_file:
