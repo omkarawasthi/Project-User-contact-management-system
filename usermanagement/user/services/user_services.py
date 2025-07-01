@@ -89,7 +89,6 @@ def register_user(data, files=None):
     if contact_serializer.is_valid():
         contact_serializer.save(user=user)
 
-
         data_send = {
             "first_name": first_name,
             "last_name": last_name,
@@ -340,7 +339,6 @@ def update_user_and_contact(id, data):
     
 
 def search_users(filters):
-    
     # filter details from query params
     name = filters.get('name').strip()
     
@@ -366,5 +364,4 @@ def search_users(filters):
         results.append(contact_data)
 
     
-
     return {"success": True, "message": "Filtered users retrieved.", "users": results}

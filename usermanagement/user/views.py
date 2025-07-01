@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class RegisterAPIView(APIView):
-    
     def post(self,request):
         try:
             files = request.FILES
