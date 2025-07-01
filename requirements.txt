@@ -12,3 +12,5 @@ gunicorn
 python-dateutil
 django-crontab
 django-cors-headers
+cloudinary 
+django-cloudinary-storage

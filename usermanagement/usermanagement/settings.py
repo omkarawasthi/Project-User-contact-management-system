@@ -8,12 +8,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('SECRET_KEY')
-SECRET_KEY = 'django-insecure-on*_^3uz#gkkxhz((vsrnj002y(dl$m0z)nk1zthxf(cf!4%zq'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -22,7 +17,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -35,7 +29,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'user',
     'drf_yasg',
+    'cloudinary',
+    'cloudinary_storage',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -53,7 +50,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
-
 
 
 
@@ -77,10 +73,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'usermanagement.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('POSTGRES_ENGINE'),
@@ -92,12 +84,6 @@ DATABASES = {
     }
 }
 
-
-
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -115,8 +101,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -127,13 +111,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -175,42 +155,26 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 # Email Configuration
-# SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-# EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-# EMAIL_HOST = os.environ.get('EMAIL_HOST') 
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
-# EMAIL_FROM = os.environ.get('EMAIL_FROM')
-
-
-
-
-
-
-
-
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-EMAIL_HOST = os.environ.get('EMAIL_HOST')        # or your provider’s SMTP host
-EMAIL_PORT = os.environ.get('EMAIL_PORT')                      # TLS port
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 
 
 
-
-
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    # Every day at 08:00, enqueue the reminder email
+    # Every day at 07:30, enqueue the reminder email
     'daily-upcoming-birthday-reminder': {
         'task': 'user.celery_task.send_upcoming_birthday_reminder',
         # 'schedule': crontab(hour=7, minute=30),
         'schedule': crontab(minute='*/1'),
     },
-    # Every day at 09:00, enqueue the birthday greeting emails
+
+    # Every day at 07:30, enqueue the birthday greeting emails
     'daily-birthday-greetings': {
         'task': 'user.celery_task.send_birthday_greetings',
         # 'schedule': crontab(hour=7, minute=30),
@@ -224,3 +188,17 @@ CELERY_BEAT_SCHEDULE = {
         'args': [24],
     },
 }
+
+
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

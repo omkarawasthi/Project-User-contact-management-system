@@ -14,23 +14,28 @@ class RegisterAPIView(APIView):
     
     def post(self,request):
         try:
-           response, statuscode = register_user(request.data)
-           return Response({**response}, status=statuscode)
+            files = request.FILES
+            response, statuscode = register_user(request.data,files)
+            return Response({**response}, status=statuscode)
         except Exception as e:
             log_in_db("Error", "CREATE", "User", {"message": "Something went wrong.", "Error": str(e)})
             return Response({"success":False,"message": "Something went wrong.", "Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+# add all the thing added now what to do, 
 class LoginAPIView(APIView):
     def post(self, request):
         try:
             response, statuscode = login_user(request.data)
             return Response({**response}, status=statuscode)
 
+
         except Exception as e:
             log_in_db("Error", "LOGIN", "User", {"message": "Something went wrong.", "Error": str(e)})
             return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# class UserImageView(APIView):
+#     def post(self, request):
+#         pass
 
 
 # This view is to get the data of Particular user using {id}.
@@ -43,6 +48,8 @@ class UserDetailedAPIView(APIView):
             return Response({"success": False, "message": "Something went wrong.", "Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+# do we have chance to go for it or not yes, we have but I didn't fought for it , I am not doing things that takes me to higher level.
 class UserListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

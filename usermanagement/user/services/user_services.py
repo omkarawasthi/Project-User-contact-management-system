@@ -6,14 +6,14 @@ from rest_framework import serializers
 from django.core.cache import cache
 from ..models import User, Contact
 from rest_framework import status
-from dotenv import load_dotenv
 from django.db.models import Q
+from dotenv import load_dotenv
 import json
 
 load_dotenv()
 
 
-def register_user(data):
+def register_user(data, files=None):
     print("data is :",data)
     first_name  = data["first_name"]
     last_name = data["last_name"]
@@ -23,6 +23,8 @@ def register_user(data):
     aadhar_no = data["aadhar_no"]
     date_of_birth = data["date_of_birth"]
     username = data["username"]
+    image = data.get("image")
+    profile_image = files.get("profile_image") if files else None
 
     # If any field is missing then return all field requireds.
     if not all([first_name, last_name, email, password, phone_no, date_of_birth, aadhar_no, username]):
@@ -61,9 +63,13 @@ def register_user(data):
         "last_name": last_name,
         "phone_no": phone_no,
         "aadhar_no": aadhar_no,
-        "date_of_birth": date_of_birth
+        "date_of_birth": date_of_birth,
+        "image_url" : profile_image,
     }
-    
+
+
+    contact_data['image'] = image
+
     #convert data to db object to insert into db.
     user_serializer = UserSerializer(data=user_data)
     
@@ -80,7 +86,6 @@ def register_user(data):
     
 
     # now we send user data to frontend so remove password field from it for security.
-
     if contact_serializer.is_valid():
         contact_serializer.save(user=user)
 
@@ -121,7 +126,6 @@ def login_user(data):
         return {"success": False, "message": "Invalid email format."}, status.HTTP_400_BAD_REQUEST
     
 
-
     # find User using email 
     user = User.objects.get(email=email)
     contact = Contact.objects.get(user_id = user.id)
@@ -157,7 +161,6 @@ def login_user(data):
     data_send['date_of_birth'] = contact_data.get('date_of_birth') # type: ignore
 
 
-
     refresh = RefreshToken.for_user(user)
     access_token = str(refresh.access_token)
     log_in_db("INFO", "LOGIN", "User", {"message": "User Login Successfully"})
@@ -180,18 +183,41 @@ def get_all_users():
 
     # if not in cache then fetch from the database.
     users = User.objects.all()
+    contacts = Contact.objects.select_related("user").all()
 
+    
+    user_data = UserSerializer(users, many=True).data
+    contact_data = ContactSerializer(contacts, many=True).data
 
-    user_serializer = UserSerializer(users, many=True)
-    data = user_serializer.data
-    
-    cache.set("all_users", json.dumps(data), timeout=60*60)
-    
+    # Build contact map using user ID
+    contact_map = {contact["user"]: contact for contact in contact_data}
+
+    combined_data = []
+
+    for user in user_data:
+        contact = contact_map.get(user["id"])
+        if contact:
+            combined_data.append({
+                "user_id": user["id"],
+                "first_name": user["first_name"],
+                "last_name": user["last_name"],
+                "email": user["email"],
+                "username": user["username"],
+                "phone_no": contact["phone_no"],
+                "aadhar_no": contact["aadhar_no"],
+                "date_of_birth": contact["date_of_birth"],
+                "image_url": contact.get("image")  # Cloudinary image URL
+            })
+
+    # Cache and return
+    cache.set("all_users", json.dumps(combined_data), timeout=60 * 60)
+
     return {
         "success": True,
         "message": "Users retrieved from database.",
-        "users": data
+        "users": combined_data
     }, status.HTTP_200_OK
+
 
 def get_user_by_id(user_id):
     # finding user from redis database cache memory
@@ -211,6 +237,7 @@ def get_user_by_id(user_id):
     user = get_object_or_404(User, id=user_id)
     contact = get_object_or_404(Contact, id = user_id)
 
+
     user_serializer = UserSerializer(user)
     user_data = user_serializer.data
     
@@ -221,10 +248,12 @@ def get_user_by_id(user_id):
     data_send['first_name'] = user_data.get('first_name') # type: ignore
     data_send['last_name'] = user_data.get('last_name') # type: ignore
     data_send['email'] = user_data.get('email') # type: ignore
-    data_send['user_id'] = contact_data.get('id') # type: ignore
+    data_send['user_id'] = contact_data.get('iser') # type: ignore
     data_send['phone_no'] = contact_data.get('phone_no') # type: ignore
     data_send['aadhar_no'] = contact_data.get('aadhar_no') # type: ignore
     data_send['date_of_birth'] = contact_data.get('date_of_birth') # type: ignore
+    data_send['image_url'] = contact_data.get('image') # type: ignore
+    
 
     cache.set(cache_key, json.dumps(data_send), timeout=60)
     return {
@@ -282,7 +311,6 @@ def update_user_and_contact(id, data):
     # Update Contact fields via serializer
     contact_serializer = ContactSerializer(instance=contact, data=contact_data, partial=True)
 
-    
 
     data_send = {}
     data_send['first_name'] = user_data.get('first_name')
