@@ -32,9 +32,7 @@ class LoginAPIView(APIView):
             log_in_db("Error", "LOGIN", "User", {"message": "Something went wrong.", "Error": str(e)})
             return Response({"success":False,"message": "Something went wrong.", "Error": str(e)},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-# class UserImageView(APIView):
-#     def post(self, request):
-#         pass
+
 
 
 # This view is to get the data of Particular user using {id}.
